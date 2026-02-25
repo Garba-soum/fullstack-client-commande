@@ -1,0 +1,75 @@
+<div class="page">
+  <div class="card">
+    <h2>Modifier le client</h2>
+    <p class="subtitle">Mets à jour les informations du client.</p>
+
+    <!-- Erreur globale -->
+    <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+    <!-- Loading -->
+    <p *ngIf="loading" class="loading">Chargement...</p>
+
+    <!-- Form -->
+    <form *ngIf="!loading" #f="ngForm" (ngSubmit)="submit(f)">
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input
+          id="nom"
+          type="text"
+          name="nom"
+          [(ngModel)]="nom"
+          required
+          [disabled]="saving"
+          #n="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || n.touched) && n.invalid">
+          Nom obligatoire.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          email
+          [disabled]="saving"
+          #e="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || e.touched) && e.invalid">
+          Email invalide.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="tel">Téléphone</label>
+        <input
+          id="tel"
+          type="text"
+          name="telephone"
+          [(ngModel)]="telephone"
+          required
+          pattern="^[0-9]{8,15}$"
+          [disabled]="saving"
+          #t="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || t.touched) && t.invalid">
+          Téléphone invalide (8 à 15 chiffres).
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving || f.invalid">
+          {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="saving">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

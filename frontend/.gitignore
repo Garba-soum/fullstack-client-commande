@@ -1,0 +1,66 @@
+# ================================
+# Angular / Build
+# ================================
+/dist
+/tmp
+/out-tsc
+/bazel-out
+/.angular
+/.angular/cache
+
+# ================================
+# Node / NPM
+# ================================
+/node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# ================================
+# Environment variables (sécurité)
+# ================================
+.env
+.env.*
+
+# ================================
+# IDEs & Editors
+# ================================
+.idea/
+.project
+.classpath
+.settings/
+.c9/
+*.launch
+*.sublime-workspace
+
+# ================================
+# Visual Studio Code
+# ================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# ================================
+# Tests / Coverage
+# ================================
+/coverage
+/test-results
+
+# ================================
+# Misc
+# ================================
+.sass-cache/
+.connect.lock
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+
+# ================================
+# OS files
+# ================================
+.DS_Store
+Thumbs.db

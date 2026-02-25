@@ -1,0 +1,23 @@
+# Node
+**/node_modules/
+**/dist/
+**/.angular/
+**/.cache/
+**/*.log
+
+# Java / Maven / Gradle
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/.idea/
+**/*.iml
+
+# Env / secrets
+.env
+**/.env
+**/*.pem
+
+# OS
+.DS_Store
+Thumbs.db

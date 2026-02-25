@@ -1,0 +1,60 @@
+<nav class="navbar">
+  <!-- ⬅️ Partie gauche : navigation métier -->
+  <div class="navbar-left" *ngIf="isLoggedIn()">
+    <a
+      routerLink="/clients"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Clients
+    </a>
+
+    <a routerLink="/commandes" routerLinkActive="active">
+      Commandes
+    </a>
+
+    <!-- Admin only -->
+    <a *ngIf="isAdmin" routerLink="/admin/create" routerLinkActive="active">
+      Créer Admin
+    </a>
+
+    <span *ngIf="isAdmin" class="badge-admin">ADMIN</span>
+  </div>
+
+  <!-- ➡️ Partie droite : auth -->
+  <div class="navbar-right">
+
+    <!-- 🔓 NON connecté -->
+    <ng-container *ngIf="!isLoggedIn()">
+      <a routerLink="/login" routerLinkActive="active">
+        Login
+      </a>
+
+      <a routerLink="/register" routerLinkActive="active">
+        Créer un compte
+      </a>
+    </ng-container>
+
+    <!-- 🔐 Connecté -->
+    <button
+      *ngIf="isLoggedIn()"
+      type="button"
+      class="btn-logout"
+      (click)="logout()"
+    >
+      Déconnexion
+    </button>
+  </div>
+</nav>
+
+<!-- Toast -->
+<div
+  *ngIf="toast.message"
+  class="toast"
+  [class.success]="toast.type === 'success'"
+  [class.error]="toast.type === 'error'"
+>
+  {{ toast.message }}
+</div>
+
+<router-outlet></router-outlet>

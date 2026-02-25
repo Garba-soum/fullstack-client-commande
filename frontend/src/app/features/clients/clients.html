@@ -1,0 +1,89 @@
+<div class="page">
+  <div class="page-header">
+    <h2>Liste des clients</h2>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="goToAdd()"
+        *ngIf="isAdmin"
+      >
+        + Ajouter un client
+      </button>
+
+      
+    </div>
+  </div>
+
+  <!-- ✅ Barre de recherche -->
+  <div class="search-bar" *ngIf="!loading && !errorMessage">
+    <input
+      type="text"
+      placeholder="Rechercher par nom ou email..."
+      [(ngModel)]="searchTerm"
+      (input)="filterClients()"
+    />
+  </div>
+
+  <p *ngIf="loading" class="loading">Chargement...</p>
+  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+  <div class="table-wrap" *ngIf="!loading && !errorMessage">
+    <table class="table" *ngIf="filteredClients.length > 0; else empty">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Commandes</th>
+          <th class="col-actions" *ngIf="isAdmin">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of filteredClients">
+          <td>{{ c.nom }}</td>
+          <td class="mono">{{ c.email }}</td>
+          <td class="mono">{{ c.telephone }}</td>
+
+          <td class="mono">
+            {{ c.ordersCount ?? 0 }}
+            <button
+              type="button"
+              class="btn btn-small btn-secondary"
+              style="margin-left: 8px;"
+              (click)="goToClientOrders(c.id)"
+            >
+              Voir
+            </button>
+          </td>
+
+          <td class="col-actions" *ngIf="isAdmin">
+            <button
+              type="button"
+              class="btn btn-small btn-primary"
+              (click)="goToEdit(c.id)"
+            >
+              Modifier
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-small btn-danger"
+              (click)="deleteClient(c.id)"
+            >
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #empty>
+      <div class="empty">
+        Aucun client trouvé.
+      </div>
+    </ng-template>
+  </div>
+</div>

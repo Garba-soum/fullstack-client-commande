@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="card">
+    <h2>Connexion</h2>
+    <p class="subtitle">Connecte-toi pour accéder à l’application.</p>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
+
+
+    <form #f="ngForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          name="username"
+          [(ngModel)]="username"
+          required
+          [disabled]="loading"
+          #u="ngModel"
+        placeholder="Ex: Ibrah"/>
+        <div class="field-error" *ngIf="(f.submitted || u.touched) && u.invalid">
+          Username obligatoire.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          minlength="4"
+          [disabled]="loading"
+          #p="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || p.touched) && p.invalid">
+          <span *ngIf="p.errors?.['required']">Mot de passe obligatoire.</span>
+          <span *ngIf="p.errors?.['minlength']">Minimum 4 caractères.</span>
+        </div>
+      </div>
+
+    
+
+      <button type="submit" class="btn btn-primary" [disabled]="loading || f.invalid">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+
+      <p class="text-center" style="margin-top: 12px;">
+  Pas encore de compte ?
+  <a routerLink="/register">Créer un compte</a>
+</p>
+
+    </form>
+  </div>
+</div>

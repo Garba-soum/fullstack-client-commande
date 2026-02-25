@@ -1,0 +1,104 @@
+/* Titre */
+h2 {
+  margin-bottom: 16px;
+}
+
+/* Lien Ajouter */
+a {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Message info USER */
+p {
+  margin: 8px 0;
+}
+
+/* Carte commande */
+.commande-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+}
+
+/* Titre commande */
+.commande-card strong {
+  font-size: 15px;
+}
+
+/* Infos commande */
+.commande-info {
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+/* Bloc client */
+.client-info {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Actions ADMIN */
+.commande-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Boutons */
+button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Bouton modifier */
+button.edit {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+/* Bouton supprimer */
+button.delete {
+  background-color: #d32f2f;
+  color: #fff;
+}
+
+/* Bouton rafraîchir */
+button.refresh {
+  margin-top: 10px;
+  background-color: #e0e0e0;
+}
+
+/* Hover */
+button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Désactivé */
+button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Chargement / erreurs */
+.loading {
+  font-style: italic;
+}
+
+.error {
+  color: #c62828;
+  font-weight: 600;
+}

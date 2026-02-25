@@ -1,0 +1,27 @@
+/* layout.css */
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.container {
+  max-width: 1100px;    
+  margin: 0 auto;        
+  padding: 16px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 12px;
+  }
+}
+
+/* IMPORTANT anti-débordement / anti-superposition */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+

@@ -1,0 +1,66 @@
+<!--  Indique si un filtre client est actif -->
+<div *ngIf="selectedClientId" style="margin: 10px 0;">
+  <strong>Filtre :</strong> commandes du client #{{ selectedClientId }}
+  <button type="button" class="refresh" style="margin-left: 10px;" (click)="clearClientFilter()">
+    Tout afficher
+  </button>
+</div>
+
+
+<h2>Liste des commandes</h2>
+
+<!-- Lien Ajouter visible uniquement pour ADMIN -->
+<a *ngIf="isAdmin" routerLink="/commandes/add">+ Ajouter une commande</a>
+
+<!-- Message pour USER -->
+<p *ngIf="!isAdmin">Création réservée à un ADMIN.</p>
+
+<p *ngIf="loading" class="loading">Chargement...</p>
+
+<p *ngIf="errorMessage" class="error">
+  {{ errorMessage }}
+</p>
+
+<div *ngIf="!loading && !errorMessage && commandes.length > 0">
+  <div *ngFor="let c of commandes" class="commande-card">
+
+    <strong>Commande #{{ c.id }}</strong>
+
+    <div class="commande-info">
+      Description : {{ c.description }}<br />
+      Montant : {{ c.montant }} €<br />
+      Date : {{ c.dateCommande ? (c.dateCommande | slice:0:10) : '-' }}
+    </div>
+
+    <!--  Actions ADMIN -->
+    <div *ngIf="isAdmin" class="commande-actions">
+      <button
+        type="button"
+        class="edit"
+        [routerLink]="['/commandes', c.id, 'edit']"
+      >
+        Modifier
+      </button>
+
+      <button
+        type="button"
+        class="delete"
+        (click)="deleteCommande(c.id)"
+      >
+        Supprimer
+      </button>
+    </div>
+
+    <div class="client-info">
+      <strong>Client :</strong>
+      {{ c.client?.nom || '-' }} — {{ c.client?.email || '-' }} — {{ c.client?.telephone || '-' }}
+    </div>
+
+  </div>
+</div>
+
+<p *ngIf="!loading && !errorMessage && commandes.length === 0">
+  Aucune commande trouvée.
+</p>
+
+

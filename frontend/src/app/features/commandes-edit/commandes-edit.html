@@ -1,0 +1,98 @@
+<div class="page">
+  <div class="card">
+    <h2>Modifier une commande</h2>
+    <p class="subtitle">Mets à jour les informations de la commande.</p>
+
+    <p *ngIf="loading" class="loading">Chargement...</p>
+
+    <form *ngIf="!loading" #f="ngForm" (ngSubmit)="submit(f)">
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="desc">Description</label>
+        <input
+          id="desc"
+          type="text"
+          name="description"
+          [(ngModel)]="description"
+          required
+          [disabled]="saving"
+          #d="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || d.touched) && d.invalid">
+          Description obligatoire.
+        </div>
+      </div>
+
+      <!-- Montant -->
+      <div class="form-group">
+        <label for="montant">Montant (€)</label>
+        <input
+          id="montant"
+          type="number"
+          name="montant"
+          [(ngModel)]="montant"
+          required
+          min="0"
+          step="0.01"
+          [disabled]="saving"
+          #m="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || m.touched) && m.invalid">
+          Montant obligatoire (>= 0).
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input
+          id="date"
+          type="date"
+          name="dateCommande"
+          [(ngModel)]="dateCommande"
+          required
+          [disabled]="saving"
+          #dt="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || dt.touched) && dt.invalid">
+          Date obligatoire.
+        </div>
+      </div>
+
+      <!-- Client -->
+      <div class="form-group">
+        <label for="client">Client</label>
+        <select
+          id="client"
+          name="clientId"
+          [(ngModel)]="clientId"
+          required
+          [disabled]="saving"
+          #c="ngModel"
+        >
+          <option [ngValue]="null" disabled>-- Sélectionner un client --</option>
+
+          <option *ngFor="let cl of clients" [ngValue]="cl.id">
+            {{ cl.nom }} ({{ cl.email }})
+          </option>
+        </select>
+
+        <div class="field-error" *ngIf="(f.submitted || c.touched) && c.invalid">
+          Client obligatoire.
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="saving || f.invalid">
+          {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="saving">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

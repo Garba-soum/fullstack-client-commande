@@ -1,0 +1,74 @@
+<div class="page">
+  <div class="card">
+    <h2>Ajouter un client</h2>
+    <p class="subtitle">Renseigne les informations du client.</p>
+
+    <form #f="ngForm" (ngSubmit)="submit(f)">
+
+      <!-- Nom -->
+      <div class="form-group">
+        <label for="nom">Nom</label>
+        <input
+          id="nom"
+          type="text"
+          name="nom"
+          [(ngModel)]="nom"
+          required
+          [disabled]="loading"
+          #n="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || n.touched) && n.invalid">
+          Nom obligatoire.
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          required
+          email
+          [disabled]="loading"
+          #e="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || e.touched) && e.invalid">
+          Email invalide.
+        </div>
+      </div>
+
+      <!-- Téléphone -->
+      <div class="form-group">
+        <label for="tel">Téléphone</label>
+        <input
+          id="tel"
+          type="text"
+          name="telephone"
+          [(ngModel)]="telephone"
+          required
+          pattern="^[0-9]{8,15}$"
+          [disabled]="loading"
+          #t="ngModel"
+        />
+        <div class="field-error" *ngIf="(f.submitted || t.touched) && t.invalid">
+          Téléphone invalide (8 à 15 chiffres).
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button type="submit" class="btn btn-primary" [disabled]="loading || f.invalid">
+          {{ loading ? 'Ajout...' : 'Ajouter' }}
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="loading">
+          Annuler
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
