@@ -5,7 +5,10 @@ pipeline {
     nodejs 'Node 20'
   }
 
-  options { timestamps() }
+  options {
+    timestamps()
+    skipDefaultCheckout(true)
+  }
 
   environment {
     BACKEND_DIR = "backend"
@@ -17,12 +20,21 @@ pipeline {
       steps { checkout scm }
     }
 
-    stage('Backend - Build (skip tests)') {
+    stage('Backend - Tests') {
       steps {
         dir("${env.BACKEND_DIR}") {
-          sh 'chmod +x mvnw'
+          sh 'chmod +x mvnw || true'
           sh './mvnw -v'
-          sh './mvnw -Dmaven.test.skip=true package'
+          sh './mvnw clean test'
+          // si tu veux skip: remplace par: sh './mvnw -DskipTests package'
+        }
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: "${env.BACKEND_DIR}/target/surefire-reports/*.xml"
+        }
+        success {
+          archiveArtifacts artifacts: "${env.BACKEND_DIR}/target/*.jar", fingerprint: true, onlyIfSuccessful: true
         }
       }
     }
