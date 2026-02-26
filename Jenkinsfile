@@ -1,22 +1,28 @@
 pipeline {
   agent any
 
+  tools {
+    nodejs 'Node 20'
+  }
+
   options { timestamps() }
 
   environment {
-    BACKEND_DIR  = "backend"
+    BACKEND_DIR = "backend"
     FRONTEND_DIR = "frontendReact"
   }
 
   stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
 
-    stage('Backend - Build (Skip Tests)') {
+    stage('Backend - Build (skip tests)') {
       steps {
         dir("${env.BACKEND_DIR}") {
-          sh 'chmod +x mvnw || true'
+          sh 'chmod +x mvnw'
           sh './mvnw -v'
-          // ✅ Ignore compilation + exécution des tests (évite ton erreur testCompile)
-          sh './mvnw clean package -Dmaven.test.skip=true'
+          sh './mvnw -DskipTests package'
         }
       }
     }
@@ -46,7 +52,7 @@ pipeline {
   }
 
   post {
-    success { echo "✅ CI Palier 1 OK: backend build + frontend build" }
-    failure { echo "❌ CI Palier 1 KO: regarde la stage en erreur" }
+    success { echo "✅ CI Palier 1 OK" }
+    failure { echo "❌ CI Palier 1 KO" }
   }
 }
