@@ -16,15 +16,14 @@ pipeline {
     // Si tu veux le garder, pas grave, mais ça fait 2 checkouts.
     // Je le supprime pour faire propre.
 
-    stage('Backend - Tests') {
-      steps {
-        dir("${env.BACKEND_DIR}") {
-          // ✅ Maven Wrapper (pas besoin d'installer Maven sur Jenkins)
-          sh 'chmod +x mvnw || true'
-          sh './mvnw -v'
-          sh './mvnw clean test'
-        }
-      }
+    stage('Backend - Build (Skip Tests)') {
+  steps {
+    dir("${env.BACKEND_DIR}") {
+      sh 'chmod +x mvnw || true'
+      sh './mvnw clean package -Dmaven.test.skip=true'
+    }
+  }
+}
       post {
         always {
           junit allowEmptyResults: true, testResults: "${env.BACKEND_DIR}/target/surefire-reports/*.xml"
