@@ -6,30 +6,27 @@ pipeline {
   }
 
   environment {
-    // Adapte si ton dossier front s’appelle autrement
-    BACKEND_DIR = "backend"
+    BACKEND_DIR  = "backend"
     FRONTEND_DIR = "frontendReact"
   }
 
   stages {
 
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
+    // ✅ Inutile si tu es en Declarative Pipeline: Jenkins fait déjà "Checkout SCM"
+    // Si tu veux le garder, pas grave, mais ça fait 2 checkouts.
+    // Je le supprime pour faire propre.
 
     stage('Backend - Tests') {
       steps {
         dir("${env.BACKEND_DIR}") {
-          // Si tu as mvnw dans backend, préfère ./mvnw (plus fiable)
-          sh 'mvn -v'
-          sh 'mvn clean test'
+          // ✅ Maven Wrapper (pas besoin d'installer Maven sur Jenkins)
+          sh 'chmod +x mvnw || true'
+          sh './mvnw -v'
+          sh './mvnw clean test'
         }
       }
       post {
         always {
-          // Si tu as Surefire reports (JUnit XML)
           junit allowEmptyResults: true, testResults: "${env.BACKEND_DIR}/target/surefire-reports/*.xml"
         }
       }
@@ -40,6 +37,7 @@ pipeline {
         dir("${env.FRONTEND_DIR}") {
           sh 'node -v'
           sh 'npm -v'
+          // ✅ si pas de package-lock.json, remplace par "npm install"
           sh 'npm ci'
         }
       }
