@@ -22,22 +22,22 @@ pipeline {
     }
 
     stage('Backend - Tests') {
-      steps {
-        dir("${env.BACKEND_DIR}") {
-          sh 'chmod +x mvnw || true'
-          sh './mvnw -v'
-          sh './mvnw -ntp clean test'
-        }
-      }
-      post {
-        always {
-          junit allowEmptyResults: true, testResults: "${env.BACKEND_DIR}/target/surefire-reports/*.xml"
-        }
-        success {
-          archiveArtifacts artifacts: "${env.BACKEND_DIR}/target/*.jar", fingerprint: true, onlyIfSuccessful: true
-        }
-      }
+  steps {
+    dir("${env.BACKEND_DIR}") {
+      sh 'chmod +x mvnw || true'
+      sh './mvnw -v'
+      sh './mvnw -ntp clean test package'
     }
+  }
+  post {
+    always {
+      junit allowEmptyResults: true, testResults: "${env.BACKEND_DIR}/target/surefire-reports/*.xml"
+    }
+    success {
+      archiveArtifacts artifacts: "${env.BACKEND_DIR}/target/*.jar", fingerprint: true, onlyIfSuccessful: true
+    }
+  }
+}
 
     stage('Frontend - Install') {
       steps {
