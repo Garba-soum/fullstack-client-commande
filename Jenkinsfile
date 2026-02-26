@@ -22,7 +22,7 @@ pipeline {
         dir("${env.BACKEND_DIR}") {
           sh 'chmod +x mvnw'
           sh './mvnw -v'
-          sh './mvnw -DskipTests package'
+          sh './mvnw -Dmaven.test.skip=true package'
         }
       }
     }
