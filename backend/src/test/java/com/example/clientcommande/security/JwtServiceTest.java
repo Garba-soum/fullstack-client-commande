@@ -1,9 +1,10 @@
 package com.example.clientcommande.security;
 
-import com.example.clientcommande.security.JwtService;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
@@ -20,13 +21,22 @@ class JwtServiceTest {
 
         // HS256 => clé >= 32 bytes. Ici 32 chars ASCII.
         ReflectionTestUtils.setField(jwtService, "secret", "01234567890123456789012345678901");
-        ReflectionTestUtils.setField(jwtService, "accessExpirationMs", 60_000L);   // 1 min
+        ReflectionTestUtils.setField(jwtService, "accessExpirationMs", 60_000L);    // 1 min
         ReflectionTestUtils.setField(jwtService, "refreshExpirationMs", 120_000L); // 2 min
+    }
+
+    private UserDetails user(String username, String role) {
+        return User.withUsername(username)
+                .password("x")
+                .roles(role)
+                .build();
     }
 
     @Test
     void generateAccessToken_thenExtractUsername_shouldMatch() {
-        String token = jwtService.generateAccessToken("admin");
+        UserDetails ud = user("admin", "ADMIN");
+
+        String token = jwtService.generateAccessToken(ud);
         assertNotNull(token);
 
         assertEquals("admin", jwtService.extractUsername(token));
@@ -34,8 +44,10 @@ class JwtServiceTest {
 
     @Test
     void accessAndRefreshTokens_shouldHaveDifferentExpirations() {
-        String access = jwtService.generateAccessToken("admin");
-        String refresh = jwtService.generateRefreshToken("admin");
+        UserDetails ud = user("admin", "ADMIN");
+
+        String access = jwtService.generateAccessToken(ud);
+        String refresh = jwtService.generateRefreshToken(ud);
 
         Date expAccess = jwtService.extractClaim(access, Claims::getExpiration);
         Date expRefresh = jwtService.extractClaim(refresh, Claims::getExpiration);
@@ -45,29 +57,18 @@ class JwtServiceTest {
 
     @Test
     void isTokenValid_shouldReturnTrue_forMatchingUser() {
-        String token = jwtService.generateAccessToken("admin");
-
-        org.springframework.security.core.userdetails.UserDetails ud =
-                org.springframework.security.core.userdetails.User
-                        .withUsername("admin")
-                        .password("x")
-                        .roles("ADMIN")
-                        .build();
+        UserDetails ud = user("admin", "ADMIN");
+        String token = jwtService.generateAccessToken(ud);
 
         assertTrue(jwtService.isTokenValid(token, ud));
     }
 
     @Test
     void isTokenValid_shouldReturnFalse_forDifferentUser() {
-        String token = jwtService.generateAccessToken("admin");
+        UserDetails udAdmin = user("admin", "ADMIN");
+        String token = jwtService.generateAccessToken(udAdmin);
 
-        org.springframework.security.core.userdetails.UserDetails ud =
-                org.springframework.security.core.userdetails.User
-                        .withUsername("other")
-                        .password("x")
-                        .roles("USER")
-                        .build();
-
-        assertFalse(jwtService.isTokenValid(token, ud));
+        UserDetails udOther = user("other", "USER");
+        assertFalse(jwtService.isTokenValid(token, udOther));
     }
 }
