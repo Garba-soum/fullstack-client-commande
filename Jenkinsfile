@@ -13,6 +13,7 @@ pipeline {
   environment {
     BACKEND_DIR = "backend"
     FRONTEND_DIR = "frontendReact"
+    NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
   }
 
   stages {
@@ -25,8 +26,7 @@ pipeline {
         dir("${env.BACKEND_DIR}") {
           sh 'chmod +x mvnw || true'
           sh './mvnw -v'
-          sh './mvnw clean test'
-          // si tu veux skip: remplace par: sh './mvnw -DskipTests package'
+          sh './mvnw -ntp clean test'
         }
       }
       post {
