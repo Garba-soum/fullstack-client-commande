@@ -36,38 +36,41 @@ pipeline {
     }
 
     stage('Frontend React - Build (Node Docker)') {
-      steps {
-        dir("${env.FRONTEND_DIR}") {
+  steps {
+    dir("${env.FRONTEND_DIR}") {
+      sh 'ls -la'
+      sh 'test -f package.json || (echo "❌ package.json introuvable" && exit 2)'
 
-          // Debug minimal (à garder au début)
-          sh 'pwd'
-          sh 'ls -la'
-          sh 'test -f package.json || (echo "❌ package.json introuvable dans frontendReact (vérifie le nom du fichier dans Git)" && exit 2)'
+      sh '''
+        set -e
 
-          sh '''
-            docker run --rm \
-              -v "$(pwd)":/app \
-              -w /app \
-              node:20-alpine \
-              sh -lc '
-                node -v
-                npm -v
-                if [ -f package-lock.json ]; then
-                  npm ci
-                else
-                  npm install
-                fi
-                npm run build
-              '
-          '''
-        }
-      }
-      post {
-        success {
-          archiveArtifacts artifacts: "${env.FRONTEND_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
-        }
-      }
+        CID=$(docker create node:20-alpine sh -lc "
+          set -e
+          cd /app
+          node -v
+          npm -v
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm run build
+        ")
+
+        echo "Container: $CID"
+
+        docker cp . "$CID":/app
+        docker start -a "$CID"
+
+        rm -rf dist
+        docker cp "$CID":/app/dist ./dist
+
+        docker rm "$CID"
+      '''
     }
+  }
+  post {
+    success {
+      archiveArtifacts artifacts: "${env.FRONTEND_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
+    }
+  }
+}
   }
 
   post {
