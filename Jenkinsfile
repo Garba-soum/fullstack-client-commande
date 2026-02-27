@@ -1,7 +1,9 @@
 pipeline {
   agent any
 
-  options { timestamps() }
+  options {
+    timestamps()
+  }
 
   environment {
     BACKEND_DIR  = "backend"
@@ -10,7 +12,9 @@ pipeline {
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+      }
     }
 
     stage('Backend - Tests + Package') {
@@ -32,25 +36,30 @@ pipeline {
     }
 
     stage('Frontend React - Build (Node Docker)') {
-  steps {
-    dir("${env.FRONTEND_DIR}") {
-      sh '''
-        docker run --rm \
-          -v "$PWD":/app -w /app \
-          node:20-alpine \
-          sh -lc "npm install && npm run build"
-      '''
+      steps {
+        dir("${env.FRONTEND_DIR}") {
+          sh '''
+            docker run --rm \
+              -v "$PWD":/app -w /app \
+              node:20-alpine \
+              sh -lc "npm install && npm run build"
+          '''
+        }
+      }
+      post {
+        success {
+          archiveArtifacts artifacts: "${env.FRONTEND_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
+        }
+      }
     }
   }
-  post {
-    success {
-      archiveArtifacts artifacts: "${env.FRONTEND_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
-    }
-  }
-}
 
   post {
-    success { echo "✅ Palier 1 OK : backend tests + frontend build" }
-    failure { echo "❌ Palier 1 KO : regarde la stage en erreur" }
+    success {
+      echo "✅ Palier 1 OK : backend tests + frontend build"
+    }
+    failure {
+      echo "❌ Palier 1 KO : regarde la stage en erreur"
+    }
   }
 }
