@@ -1,10 +1,6 @@
 pipeline {
   agent any
 
-  tools {
-    nodejs 'Node 20'
-  }
-
   options {
     timestamps()
     skipDefaultCheckout(true)
@@ -65,10 +61,16 @@ pipeline {
     }
 
     stage('Docker - Check') {
-      steps {
-        sh 'docker version'
-      }
-    }
+  steps {
+    sh 'whoami'
+    sh 'pwd'
+    sh 'echo $PATH'
+    sh 'which docker || true'
+    sh 'ls -l /usr/bin/docker || true'
+    sh 'ls -l /usr/local/bin/docker || true'
+    sh 'docker version'
+  }
+}
 
     stage('Docker - Build Images') {
       steps {
