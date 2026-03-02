@@ -14,7 +14,7 @@ pipeline {
     DOCKERHUB_USER = "soumaina1u"
 
     // AWS (à adapter)
-    AWS_IP = "13.37.215.19"
+    AWS_IP = "51.44.11.142"
     AWS_USER = "ubuntu"
   }
 
