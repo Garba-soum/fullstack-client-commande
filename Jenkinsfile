@@ -13,8 +13,7 @@ pipeline {
 
     DOCKERHUB_USER = "soumaina1u"
 
-    // AWS (à adapter)
-    AWS_IP = "51.44.11.142"
+    AWS_IP   = "51.44.11.142"
     AWS_USER = "ubuntu"
   }
 
@@ -115,7 +114,6 @@ pipeline {
         sh "docker build -t ${env.IMG_REACT}:${env.BUILD_NUMBER}    ${env.REACT_DIR}"
         sh "docker build -t ${env.IMG_ANGULAR}:${env.BUILD_NUMBER}  ${env.ANGULAR_DIR}"
 
-        // tag latest (pratique pour le déploiement)
         sh "docker tag ${env.IMG_BACKEND}:${env.BUILD_NUMBER}  ${env.IMG_BACKEND}:latest"
         sh "docker tag ${env.IMG_REACT}:${env.BUILD_NUMBER}    ${env.IMG_REACT}:latest"
         sh "docker tag ${env.IMG_ANGULAR}:${env.BUILD_NUMBER}  ${env.IMG_ANGULAR}:latest"
@@ -150,20 +148,49 @@ pipeline {
         sshagent(['aws-ssh-key']) {
           sh """
             set -e
-            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
 
+            echo "=== Jenkins workspace ==="
+            pwd
+            ls -la
+
+            echo "=== Check required files ==="
+            test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable à la racine du repo" && exit 2)
+            test -f .env.prod || (echo "❌ .env.prod introuvable à la racine du repo" && exit 2)
+
+            echo "=== Copy files to AWS ==="
+            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/docker-compose.prod.yml
+            scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/.env.prod
+
+            echo "=== Deploy on AWS ==="
             ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} '
               set -e
-              cd /home/${AWS_USER}
+              cd /home/'${AWS_USER}'
 
-              # login dockerhub si tes images sont privées (sinon inutile)
-              # docker login -u ${DOCKERHUB_USER} -p XXX
+              echo "=== Server folder ==="
+              ls -la
 
-              docker compose -f docker-compose.prod.yml pull || docker-compose -f docker-compose.prod.yml pull
-              docker compose -f docker-compose.prod.yml down || docker-compose -f docker-compose.prod.yml down
-              docker compose -f docker-compose.prod.yml up -d || docker-compose -f docker-compose.prod.yml up -d
+              echo "=== Docker versions ==="
+              docker --version || true
 
+              DC="docker compose"
+              docker compose version >/dev/null 2>&1 || DC="docker-compose"
+              echo "Using: $DC"
+
+              # (optionnel) si tes images DockerHub sont privées :
+              # echo "DOCKERHUB_PASSWORD" | docker login -u '${DOCKERHUB_USER}' --password-stdin
+
+              echo "=== Pull images ==="
+              $DC -f docker-compose.prod.yml --env-file .env.prod pull
+
+              echo "=== Restart stack ==="
+              $DC -f docker-compose.prod.yml --env-file .env.prod down || true
+              $DC -f docker-compose.prod.yml --env-file .env.prod up -d
+
+              echo "=== Running containers ==="
               docker ps
+
+              echo "=== Compose status ==="
+              $DC -f docker-compose.prod.yml --env-file .env.prod ps || true
             '
           """
         }
