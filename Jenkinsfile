@@ -156,7 +156,7 @@ pipeline {
             echo "👉 Install one time manually on the server, then rerun Jenkins"
             exit 1
           fi
-          echo "Using: $DC"
+          echo "Using: \$DC"
 
           echo "=== Pull images ==="
           $DC -f docker-compose.prod.yml --env-file .env.prod pull
