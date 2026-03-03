@@ -124,45 +124,51 @@ pipeline {
     }
 
     stage('Deploy AWS (docker compose)') {
-  steps {
-    sshagent(['aws-ssh-key']) {
-      sh """
-        set -e
+      steps {
+        sshagent(['aws-ssh-key']) {
+          sh """
+            set -e
 
-        test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable" && exit 2)
-        test -f .env.prod || (echo "❌ .env.prod introuvable" && exit 2)
-        test -d db || (echo "❌ dossier db/ introuvable" && exit 2)
+            test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable" && exit 2)
+            test -f .env.prod || (echo "❌ .env.prod introuvable" && exit 2)
+            test -d db || (echo "❌ dossier db/ introuvable" && exit 2)
 
-        echo "=== Prepare /home/${AWS_USER}/db with correct permissions ==="
-        ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} "sudo rm -rf /home/${AWS_USER}/db && mkdir -p /home/${AWS_USER}/db && sudo chown -R ${AWS_USER}:${AWS_USER} /home/${AWS_USER}/db"
+            echo "=== Prepare /home/${AWS_USER}/db with correct permissions ==="
+            ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} "sudo rm -rf /home/${AWS_USER}/db && sudo mkdir -p /home/${AWS_USER}/db && sudo chown -R ${AWS_USER}:${AWS_USER} /home/${AWS_USER}/db"
 
-        echo "=== Copy files to AWS ==="
-        scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
-        scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
-        scp -o StrictHostKeyChecking=no -r ./db/* ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/db/
+            echo "=== Copy files to AWS ==="
+            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
+            scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
+            scp -o StrictHostKeyChecking=no -r ./db/* ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/db/
 
-        echo "=== Deploy on AWS ==="
-        ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} 'bash -s' <<EOF
-          set -e
-          cd /home/${AWS_USER}
+            echo "=== Deploy on AWS ==="
+            ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} 'bash -s' <<EOF
+              set -e
+              cd /home/${AWS_USER}
 
-          DC="docker compose"
-          docker compose version >/dev/null 2>&1 || DC="docker-compose"
-          echo "Using: \$DC"
+              echo "=== Docker versions ==="
+              docker --version || true
+              docker compose version || true
 
-          \$DC -f docker-compose.prod.yml --env-file .env.prod pull
-          \$DC -f docker-compose.prod.yml --env-file .env.prod down || true
-          \$DC -f docker-compose.prod.yml --env-file .env.prod up -d
+              echo "=== Pull images ==="
+              docker compose -f docker-compose.prod.yml --env-file .env.prod pull
 
-          \$DC -f docker-compose.prod.yml --env-file .env.prod ps || true
-          docker ps
-          docker logs --tail 80 app-mssql || true
-          docker logs --tail 120 app-backend || true
+              echo "=== Restart stack ==="
+              docker compose -f docker-compose.prod.yml --env-file .env.prod down || true
+              docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+
+              echo "=== Status ==="
+              docker compose -f docker-compose.prod.yml --env-file .env.prod ps || true
+              docker ps
+
+              echo "=== Logs (db/backend) ==="
+              docker logs --tail 120 app-mssql || true
+              docker logs --tail 200 app-backend || true
 EOF
-      """
+          """
+        }
+      }
     }
-  }
-}
   }
 
   post {
