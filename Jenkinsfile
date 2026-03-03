@@ -46,14 +46,11 @@ pipeline {
         dir("${env.REACT_DIR}") {
           sh '''
             set -e
-            echo "Workspace React:"; pwd; ls -la
             test -f package.json || (echo "package.json introuvable (React)" && exit 2)
 
             CID=$(docker create node:20-alpine sh -lc '
               set -e
               cd /app
-              node -v
-              npm -v
               if [ -f package-lock.json ]; then npm ci; else npm install; fi
               npm run build
             ')
@@ -65,11 +62,6 @@ pipeline {
             docker cp "$CID":/app/dist ./dist
             docker rm "$CID"
           '''
-        }
-      }
-      post {
-        success {
-          archiveArtifacts artifacts: "${env.REACT_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
         }
       }
     }
@@ -79,14 +71,11 @@ pipeline {
         dir("${env.ANGULAR_DIR}") {
           sh '''
             set -e
-            echo "Workspace Angular:"; pwd; ls -la
             test -f package.json || (echo "package.json introuvable (Angular)" && exit 2)
 
             CID=$(docker create node:20-alpine sh -lc '
               set -e
               cd /app
-              node -v
-              npm -v
               if [ -f package-lock.json ]; then npm ci; else npm install; fi
               npm run build
             ')
@@ -100,16 +89,10 @@ pipeline {
           '''
         }
       }
-      post {
-        success {
-          archiveArtifacts artifacts: "${env.ANGULAR_DIR}/dist/**", fingerprint: true, onlyIfSuccessful: true
-        }
-      }
     }
 
     stage('Docker - Build 3 images') {
       steps {
-        sh 'docker version'
         sh "docker build -t ${env.IMG_BACKEND}:${env.BUILD_NUMBER}  ${env.BACKEND_DIR}"
         sh "docker build -t ${env.IMG_REACT}:${env.BUILD_NUMBER}    ${env.REACT_DIR}"
         sh "docker build -t ${env.IMG_ANGULAR}:${env.BUILD_NUMBER}  ${env.ANGULAR_DIR}"
@@ -117,8 +100,6 @@ pipeline {
         sh "docker tag ${env.IMG_BACKEND}:${env.BUILD_NUMBER}  ${env.IMG_BACKEND}:latest"
         sh "docker tag ${env.IMG_REACT}:${env.BUILD_NUMBER}    ${env.IMG_REACT}:latest"
         sh "docker tag ${env.IMG_ANGULAR}:${env.BUILD_NUMBER}  ${env.IMG_ANGULAR}:latest"
-
-        sh "docker images | head -n 30"
       }
     }
 
@@ -132,7 +113,6 @@ pipeline {
             for img in fullstack-backend fullstack-frontend-react fullstack-frontend-angular; do
               docker tag $img:${BUILD_NUMBER} ${DOCKERHUB_USER}/$img:${BUILD_NUMBER}
               docker tag $img:latest         ${DOCKERHUB_USER}/$img:latest
-
               docker push ${DOCKERHUB_USER}/$img:${BUILD_NUMBER}
               docker push ${DOCKERHUB_USER}/$img:latest
             done
@@ -144,56 +124,40 @@ pipeline {
     }
 
     stage('Deploy AWS (docker compose)') {
-  steps {
-    sshagent(['aws-ssh-key']) {
-      sh """
-        set -e
+      steps {
+        sshagent(['aws-ssh-key']) {
+          sh """
+            set -e
 
-        echo "=== Jenkins workspace ==="
-        pwd
-        ls -la
+            test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable" && exit 2)
+            test -f .env.prod || (echo "❌ .env.prod introuvable" && exit 2)
+            test -d db || (echo "❌ dossier db/ introuvable" && exit 2)
 
-        echo "=== Check required files ==="
-        test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable à la racine du repo" && exit 2)
-        test -f .env.prod || (echo "❌ .env.prod introuvable à la racine du repo" && exit 2)
+            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/docker-compose.prod.yml
+            scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/.env.prod
+            scp -o StrictHostKeyChecking=no -r db ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/db
 
-        echo "=== Copy files to AWS ==="
-        scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/docker-compose.prod.yml
-        scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/.env.prod
+            ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} 'bash -s' <<EOF
+              set -e
+              cd /home/${AWS_USER}
 
-        echo "=== Deploy on AWS ==="
-        ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} '
-          set -e
-          cd /home/${AWS_USER}
+              DC="docker compose"
+              docker compose version >/dev/null 2>&1 || DC="docker-compose"
+              echo "Using: \$DC"
 
-          echo "=== Server folder ==="
-          ls -la
+              \$DC -f docker-compose.prod.yml --env-file .env.prod pull
+              \$DC -f docker-compose.prod.yml --env-file .env.prod down || true
+              \$DC -f docker-compose.prod.yml --env-file .env.prod up -d
 
-          echo "=== Docker versions ==="
-          docker --version || true
-
-          DC="docker compose"
-          docker compose version >/dev/null 2>&1 || DC="docker-compose"
-
-          echo "Using: \$DC"
-
-          echo "=== Pull images ==="
-          \$DC -f docker-compose.prod.yml --env-file .env.prod pull
-
-          echo "=== Restart stack ==="
-          \$DC -f docker-compose.prod.yml --env-file .env.prod down || true
-          \$DC -f docker-compose.prod.yml --env-file .env.prod up -d
-
-          echo "=== Running containers ==="
-          docker ps
-
-          echo "=== Compose status ==="
-          \$DC -f docker-compose.prod.yml --env-file .env.prod ps || true
-        '
-      """
+              \$DC -f docker-compose.prod.yml --env-file .env.prod ps || true
+              docker ps
+              docker logs --tail 80 app-mssql || true
+              docker logs --tail 120 app-backend || true
+EOF
+          """
+        }
+      }
     }
-  }
-}
   }
 
   post {
