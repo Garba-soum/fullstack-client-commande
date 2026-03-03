@@ -128,48 +128,36 @@ pipeline {
     sshagent(['aws-ssh-key']) {
       sh """
         set -e
-
         test -f docker-compose.prod.yml || (echo "❌ docker-compose.prod.yml introuvable" && exit 2)
         test -f .env.prod || (echo "❌ .env.prod introuvable" && exit 2)
         test -d db || (echo "❌ dossier db/ introuvable" && exit 2)
 
-        echo "=== Prepare /home/${AWS_USER}/db with correct permissions ==="
         ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} "sudo rm -rf /home/${AWS_USER}/db && sudo mkdir -p /home/${AWS_USER}/db && sudo chown -R ${AWS_USER}:${AWS_USER} /home/${AWS_USER}/db"
 
-        echo "=== Copy files to AWS ==="
         scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
         scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
         scp -o StrictHostKeyChecking=no -r db ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
 
-        echo "=== Deploy on AWS ==="
         ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} 'bash -s' <<'EOF'
           set -e
           cd /home/ubuntu
 
-          echo "=== Detect docker compose ==="
           if docker compose version >/dev/null 2>&1; then
             DC="docker compose"
           elif command -v docker-compose >/dev/null 2>&1; then
             DC="docker-compose"
           else
             echo "❌ docker compose not installed on server"
-            echo "👉 Install one time manually on the server, then rerun Jenkins"
             exit 1
           fi
           echo "Using: \$DC"
 
-          echo "=== Pull images ==="
-          $DC -f docker-compose.prod.yml --env-file .env.prod pull
+          \$DC -f docker-compose.prod.yml --env-file .env.prod pull
+          \$DC -f docker-compose.prod.yml --env-file .env.prod down || true
+          \$DC -f docker-compose.prod.yml --env-file .env.prod up -d
+          \$DC -f docker-compose.prod.yml --env-file .env.prod ps || true
 
-          echo "=== Restart stack ==="
-          $DC -f docker-compose.prod.yml --env-file .env.prod down || true
-          $DC -f docker-compose.prod.yml --env-file .env.prod up -d
-
-          echo "=== Status ==="
-          $DC -f docker-compose.prod.yml --env-file .env.prod ps || true
           docker ps
-
-          echo "=== Logs ==="
           docker logs --tail 120 app-mssql || true
           docker logs --tail 200 app-backend || true
 EOF
