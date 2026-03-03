@@ -25,7 +25,7 @@ services:
       retries: 20
       start_period: 30s
 
-  backend:
+    backend:
     image: soumaina1u/fullstack-backend:latest
     container_name: app-backend
     healthcheck:
