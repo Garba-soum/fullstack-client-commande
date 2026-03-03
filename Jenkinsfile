@@ -133,9 +133,9 @@ pipeline {
             test -f .env.prod || (echo "❌ .env.prod introuvable" && exit 2)
             test -d db || (echo "❌ dossier db/ introuvable" && exit 2)
 
-            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/docker-compose.prod.yml
-            scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/.env.prod
-            scp -o StrictHostKeyChecking=no -r db ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/db
+            scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
+            scp -o StrictHostKeyChecking=no .env.prod ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
+            scp -o StrictHostKeyChecking=no -r ./db ${AWS_USER}@${AWS_IP}:/home/${AWS_USER}/
 
             ssh -o StrictHostKeyChecking=no ${AWS_USER}@${AWS_IP} 'bash -s' <<EOF
               set -e
