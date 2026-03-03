@@ -26,20 +26,22 @@ services:
       start_period: 30s
 
   backend:
-    image: soumaina1u/fullstack-backend:latest
-    container_name: app-backend
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:sqlserver://db:1433;databaseName=${MSSQL_DB};encrypt=true;trustServerCertificate=true"
-      SPRING_DATASOURCE_USERNAME: "sa"
-      SPRING_DATASOURCE_PASSWORD: "${SA_PASSWORD}"
-    ports:
-      - "${BACKEND_PORT}:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - appnet
+  image: soumaina1u/fullstack-backend:latest
+  container_name: app-backend
+  healthcheck:
+    disable: true
+  environment:
+    SPRING_DATASOURCE_URL: "jdbc:sqlserver://db:1433;databaseName=${MSSQL_DB};encrypt=true;trustServerCertificate=true"
+    SPRING_DATASOURCE_USERNAME: "sa"
+    SPRING_DATASOURCE_PASSWORD: "${SA_PASSWORD}"
+  ports:
+    - "${BACKEND_PORT}:8080"
+  depends_on:
+    db:
+      condition: service_healthy
+  restart: unless-stopped
+  networks:
+    - appnet
 
   frontend:
     image: soumaina1u/fullstack-frontend-angular:latest

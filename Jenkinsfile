@@ -13,7 +13,7 @@ pipeline {
 
     DOCKERHUB_USER = "soumaina1u"
 
-    AWS_IP   = "13.39.25.201"
+    AWS_IP   = "13.39.82.60"
     AWS_USER = "ubuntu"
   }
 
