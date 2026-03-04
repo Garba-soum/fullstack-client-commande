@@ -25,14 +25,13 @@ services:
       retries: 20
       start_period: 30s
 
-    backend:
+  backend:
     image: soumaina1u/fullstack-backend:latest
     container_name: app-backend
     environment:
       SPRING_DATASOURCE_URL: "jdbc:sqlserver://db:1433;databaseName=${MSSQL_DB};encrypt=true;trustServerCertificate=true"
       SPRING_DATASOURCE_USERNAME: "sa"
       SPRING_DATASOURCE_PASSWORD: "${SA_PASSWORD}"
-
       APP_JWT_SECRET: "${APP_JWT_SECRET}"
       APP_JWT_ACCESS_EXPIRATION: "${APP_JWT_ACCESS_EXPIRATION}"
       APP_JWT_REFRESH_EXPIRATION: "${APP_JWT_REFRESH_EXPIRATION}"
