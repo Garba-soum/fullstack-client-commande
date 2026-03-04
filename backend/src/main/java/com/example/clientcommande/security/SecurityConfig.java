@@ -39,11 +39,13 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/register-admin", "/auth/refresh").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-
+                        .requestMatchers("/auth/login", "/auth/register",
+                                "/auth/register-admin", "/auth/refresh").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS,
+                                "/**").permitAll()
                         .requestMatchers("/auth/register-admin").hasRole("ADMIN")
-                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health")
+                        .permitAll()
 
                         // Clients
                         .requestMatchers(HttpMethod.GET, "/clients/**").hasAnyRole("USER","ADMIN")
@@ -74,12 +76,15 @@ public class SecurityConfig {
 
         // Origine Angular/React
         config.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:4200",
-                "http://localhost:4300",
-                "http://localhost:5173",
-                "http://15.237.159.190",
-                "http://15.237.159.190:80",
-                "http://15.237.159.190:4300"
+               // "http://localhost:4200",
+                //"http://localhost:4300",
+                //"http://localhost:5173",
+                //"http://15.237.159.190",
+                //"http://15.237.159.190:80",
+                //"http://15.237.159.190:4300"
+                "http://localhost:*",
+                "http://15.237.159.190:*",
+                "http://*.eu-west-3.compute.amazonaws.com:*"
 
         ));
 
