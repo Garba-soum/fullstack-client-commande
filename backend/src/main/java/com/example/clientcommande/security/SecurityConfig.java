@@ -76,7 +76,10 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:4200",
                 "http://localhost:4300",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "http://15.237.159.190",
+                "http://15.237.159.190:80",
+                "http://15.237.159.190:4300"
 
         ));
 
