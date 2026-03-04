@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // important : on passe par le proxy Vite
+  baseURL: 'http://15.237.159.190:8081',
 })
 
 api.interceptors.request.use((config) => {
