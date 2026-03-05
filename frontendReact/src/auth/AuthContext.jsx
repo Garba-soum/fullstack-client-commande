@@ -12,29 +12,24 @@ function safeDecode(token) {
 }
 
 export function AuthProvider({ children }) {
-  // init : si token déjà en localStorage, on restaure la session
-  const [token, setToken] = useState(() => localStorage.getItem('token') || '')
+  // ✅ on lit accessToken
+  const [token, setToken] = useState(() => localStorage.getItem('accessToken') || '')
   const decoded = useMemo(() => (token ? safeDecode(token) : null), [token])
 
-  // user = payload du JWT (ex: sub/email, role, exp...)
   const user = decoded
-
-  //  rôle (selon ton backend: parfois "ROLE_ADMIN" ou "ADMIN")
   const role = user?.role || user?.roles?.[0] || null
 
-  //  login: sauvegarde token + met à jour le state global
+  // ✅ on stocke accessToken
   const login = (newToken) => {
-    localStorage.setItem('token', newToken)
+    localStorage.setItem('accessToken', newToken)
     setToken(newToken)
   }
 
-  // logout: supprime token + purge le state
   const logout = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('accessToken')
     setToken('')
   }
 
-  //  isAuthenticated = vrai si token présent ET décodable
   const isAuthenticated = !!token && !!user
 
   return (

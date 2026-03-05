@@ -49,6 +49,7 @@ export default function Login() {
       if (!accessToken) {
         throw new Error('accessToken manquant dans la réponse du backend')
       }
+      localStorage.setItem('accessToken', accessToken)
 
       login(accessToken)
       navigate(redirectTo, { replace: true })
