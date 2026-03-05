@@ -82,17 +82,18 @@ public class SecurityConfig {
                 //"http://15.237.159.190",
                 //"http://15.237.159.190:80",
                 //"http://15.237.159.190:4300"
+                /*
                 "http://localhost",
                 "http://localhost:*",
                 "http://15.237.159.190:*",
-                "http://*.eu-west-3.compute.amazonaws.com:*"
+                "http://*.eu-west-3.compute.amazonaws.com:*"*/
 
-               /* "http://15.237.159.190",        // IMPORTANT (sans port)
+                "http://15.237.159.190",        // IMPORTANT (sans port)
                 "http://15.237.159.190:*",      // avec port (react 4300 etc.)
                 "http://localhost",
                 "http://localhost:*",
                 "http://*.eu-west-3.compute.amazonaws.com",
-                "http://*.eu-west-3.compute.amazonaws.com:*" */
+                "http://*.eu-west-3.compute.amazonaws.com:*"
 
         ));
 
