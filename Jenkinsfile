@@ -152,14 +152,14 @@ pipeline {
           fi
           echo "Using: \$DC"
 
-          \$DC -f docker-compose.prod.yml --env-file .env.prod pull
-          \$DC -f docker-compose.prod.yml --env-file .env.prod down || true
-          \$DC -f docker-compose.prod.yml --env-file .env.prod up -d
-          \$DC -f docker-compose.prod.yml --env-file .env.prod ps || true
+          $DC -f docker-compose.prod.yml --env-file .env.prod down || true
+          $DC -f docker-compose.prod.yml --env-file .env.prod pull
+          $DC -f docker-compose.prod.yml --env-file .env.prod up -d
+          $DC -f docker-compose.prod.yml --env-file .env.prod ps || true
 
           docker ps
-          docker logs --tail 120 app-mssql || true
-          docker logs --tail 200 app-backend || true
+          timeout_cmd docker logs --tail 120 app-mssql
+          timeout_cmd docker logs --tail 200 app-backend
 EOF
       """
     }
