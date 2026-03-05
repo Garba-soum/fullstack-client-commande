@@ -25,21 +25,21 @@ public class ClientController {
     }
 
     //  Lister tous les clients → USER + ADMIN
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN','USER','ADMIN')")
     @GetMapping
     public List<ClientListDTO> obtenirTousLesClients() {
         return clientService.obtenirTousLesClientsAvecCount();
     }
 
     //  Récupérer un client par ID → USER + ADMIN
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN','USER','ADMIN')")
     @GetMapping("/{id}")
     public Client obtenirClientParId(@PathVariable Long id) {
         return clientService.obtenirClientParId(id);
     }
 
     //  Créer un client → ADMIN uniquement
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     @PostMapping
     public Client ajouterClient(@RequestBody @Valid ClientDTO clientDTO) {
         Client client = new Client();
@@ -51,7 +51,7 @@ public class ClientController {
     }
 
     //  Modifier un client → ADMIN uniquement
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     @PutMapping("/{id}")
     public Client modifierClient(@PathVariable Long id,
                                  @Valid @RequestBody ClientDTO clientDTO) {
@@ -60,7 +60,7 @@ public class ClientController {
 
     @DeleteMapping("/{id}")
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     public ResponseEntity<?> supprimerClient(@PathVariable Long id) {
         clientService.supprimerClient(id);
         return ResponseEntity.ok("Client supprimé avec succès");

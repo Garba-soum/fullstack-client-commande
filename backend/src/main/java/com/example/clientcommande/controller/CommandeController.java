@@ -21,21 +21,21 @@ public class CommandeController {
     }
 
     //  Lister toutes les commandes → USER + ADMIN
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN','USER','ADMIN')")
     @GetMapping
     public List<Commande> obtenirToutesLesCommandes() {
         return commandeService.obtenirToutesLesCommandes();
     }
 
     //  Récupérer une commande par ID → USER + ADMIN
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN','USER','ADMIN')")
     @GetMapping("/{id}")
     public Commande obtenirCommandeParId(@PathVariable Long id) {
         return commandeService.obtenirCommandeParId(id);
     }
 
     //  Créer une commande → ADMIN uniquement
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     @PostMapping
     public Commande ajouterCommande(@RequestBody @Valid CommandeDTO commandeDTO) {
         Commande commande = new Commande();
@@ -47,7 +47,7 @@ public class CommandeController {
     }
 
     //  Modifier une commande → ADMIN uniquement
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     @PutMapping("/{id}")
     public Commande modifierCommande(@PathVariable Long id,
                                      @Valid @RequestBody CommandeDTO dto) {
@@ -56,7 +56,7 @@ public class CommandeController {
 
     @DeleteMapping("/{id}")
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ADMIN')")
     public ResponseEntity<?> supprimerCommande(@PathVariable Long id) {
         commandeService.supprimerCommande(id);
         return ResponseEntity.ok("Commande supprimée avec succès");
