@@ -48,19 +48,19 @@ public class SecurityConfig {
                         .permitAll()
 
                         // Clients
-                        .requestMatchers(HttpMethod.GET, "/clients/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/clients/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/clients/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/clients/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/clients/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN","USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/clients/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/clients/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/clients/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
 
                         // Commandes
-                        .requestMatchers(HttpMethod.GET, "/commandes/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/commandes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/commandes/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/commandes/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/commandes/**").hasAnyAuthority("ROLE_USER","ROLE_ADMIN","USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/commandes/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/commandes/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/commandes/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
 
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
+                        .requestMatchers("/actuator/**").hasAnyAuthority("ROLE_ADMIN","ADMIN")
 
                         .anyRequest().authenticated()
                 )
