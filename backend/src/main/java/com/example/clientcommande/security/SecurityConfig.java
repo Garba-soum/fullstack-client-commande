@@ -82,6 +82,7 @@ public class SecurityConfig {
                 //"http://15.237.159.190",
                 //"http://15.237.159.190:80",
                 //"http://15.237.159.190:4300"
+                "http://localhost",
                 "http://localhost:*",
                 "http://15.237.159.190:*",
                 "http://*.eu-west-3.compute.amazonaws.com:*"
