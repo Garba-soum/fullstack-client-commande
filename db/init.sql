@@ -21,14 +21,52 @@ BEGIN
 END
 GO
 
--- Insérer l’admin si absent
-IF NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin')
+-- Créer la table clients si elle n'existe pas
+IF OBJECT_ID('clients', 'U') IS NULL
+BEGIN
+    CREATE TABLE clients (
+        id BIGINT IDENTITY(1,1) PRIMARY KEY,
+        nom NVARCHAR(255) NOT NULL,
+        email NVARCHAR(255) NOT NULL,
+        telephone NVARCHAR(50) NOT NULL
+    );
+END
+GO
+
+-- Créer la table commandes si elle n'existe pas
+IF OBJECT_ID('commandes', 'U') IS NULL
+BEGIN
+    CREATE TABLE commandes (
+        id BIGINT IDENTITY(1,1) PRIMARY KEY,
+        produit NVARCHAR(255) NOT NULL,
+        quantite INT NOT NULL,
+        prix DECIMAL(18,2) NOT NULL,
+        client_id BIGINT NOT NULL,
+        CONSTRAINT FK_commandes_clients FOREIGN KEY (client_id) REFERENCES clients(id)
+    );
+END
+GO
+
+-- Créer ou mettre à jour l'utilisateur admin
+IF EXISTS (SELECT 1 FROM users WHERE username = 'admin')
+BEGIN
+    UPDATE users
+    SET password = '$2a$10$cF/mWP0Nzh7RVWOmf5L4Tub.3JSSW6czxI/Y6.csrvUZRQUajejJG',
+        role = 'ADMIN'
+    WHERE username = 'admin';
+END
+ELSE
 BEGIN
     INSERT INTO users (username, password, role)
     VALUES (
         'admin',
-        '$2a$10$5.SDn0Eaew.rxY8t6VGwIuY0l9Ag.e2eqmMLDTNS6q692CdeCDQKa',
+        '$2a$10$cF/mWP0Nzh7RVWOmf5L4Tub.3JSSW6czxI/Y6.csrvUZRQUajejJG',
         'ADMIN'
     );
 END
+GO
+
+-- Vérification
+SELECT id, username, role, password
+FROM users;
 GO
